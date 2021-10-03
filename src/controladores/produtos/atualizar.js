@@ -13,9 +13,13 @@ const atualizar = async (req, res) => {
 
   try {
     const verificaAcesso = "select * from produtos where id = $1";
-    const { rows: resultadoAcesso } = await db.query(verificaAcesso, [
+    const { rowCount, rows: resultadoAcesso } = await db.query(verificaAcesso, [
       produtoID,
     ]);
+
+    if (rowCount === 0) {
+      return res.status(404).json({ mensagem: `Produto não encontrado.` });
+    }
 
     if (resultadoAcesso[0].usuario_id !== usuarioID) {
       return res.status(403).json({
