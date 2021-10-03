@@ -22,7 +22,7 @@ const detalhar = async (req, res) => {
       });
     }
 
-    res.json(produto);
+    res.json(produto[0]);
   } catch (error) {
     res.status(400).json(error.message);
   }
