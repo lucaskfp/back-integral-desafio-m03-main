@@ -1,3 +1,4 @@
-const app = require('./servidor');
+require("dotenv").config();
+const app = require("./servidor");
 
 app.listen(3000);
