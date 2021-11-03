@@ -1,16 +1,14 @@
 const db = require("../../conexao");
 
+const { schemaCadastroProduto } = require("../../validacoes/schemas");
+
 const cadastrar = async (req, res) => {
   const { nome, quantidade, categoria, preco, descricao, imagem } = req.body;
   const usuarioID = req.usuario_id;
 
-  const camposObrigatorios = verificaCampos(nome, quantidade, preco, descricao);
-
-  if (camposObrigatorios) {
-    return res.status(400).json(camposObrigatorios);
-  }
-
   try {
+    await schemaCadastroProduto.validate(req.body);
+
     const query = `
       insert into produtos (usuario_id, nome, quantidade, categoria, preco, descricao, imagem)
       values ($1,$2,$3,$4,$5,$6,$7)
@@ -33,18 +31,8 @@ const cadastrar = async (req, res) => {
 
     return res.status(201).json();
   } catch (error) {
-    res.status(400).json(error);
+    res.status(400).json(error.message);
   }
 };
-
-function verificaCampos(nome, quantidade, preco, descricao) {
-  if (!nome) return { mensagem: "O campo nome é obrigatório." };
-  if (!quantidade || quantidade <= 0)
-    return { mensagem: "O campo quantidade precisa ser maior que zero." };
-  if (!preco) return { mensagem: "O campo preço é obrigatório." };
-  if (!descricao) return { mensagem: "O campo descrição é obrigatório." };
-
-  return false;
-}
 
 module.exports = cadastrar;

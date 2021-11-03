@@ -1,17 +1,15 @@
 const db = require("../../conexao");
 
+const { schemaCadastroProduto } = require("../../validacoes/schemas");
+
 const atualizar = async (req, res) => {
   const { nome, quantidade, categoria, preco, descricao, imagem } = req.body;
   const usuarioID = req.usuario_id;
   const produtoID = req.params.id;
 
-  const camposObrigatorios = verificaCampos(nome, quantidade, preco, descricao);
-
-  if (camposObrigatorios) {
-    return res.status(400).json(camposObrigatorios);
-  }
-
   try {
+    await schemaCadastroProduto.validate(req.body);
+
     const verificaAcesso = "select * from produtos where id = $1";
     const { rowCount, rows: resultadoAcesso } = await db.query(verificaAcesso, [
       produtoID,
@@ -50,18 +48,8 @@ const atualizar = async (req, res) => {
 
     return res.status(201).json();
   } catch (error) {
-    res.status(400).json(error);
+    res.status(400).json(error.message);
   }
 };
-
-function verificaCampos(nome, quantidade, preco, descricao) {
-  if (!nome) return { mensagem: "O campo nome é obrigatório." };
-  if (!quantidade || quantidade <= 0)
-    return { mensagem: "O campo quantidade precisa ser maior que zero." };
-  if (!preco) return { mensagem: "O campo preço é obrigatório." };
-  if (!descricao) return { mensagem: "O campo descrição é obrigatório." };
-
-  return false;
-}
 
 module.exports = atualizar;
