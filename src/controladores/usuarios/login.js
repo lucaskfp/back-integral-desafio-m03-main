@@ -1,17 +1,14 @@
 const db = require("../../conexao");
 const bcrypt = require("bcrypt");
 const jtw = require("jsonwebtoken");
-const secret = require("../../tokenSecret");
+const { schemaLoginUsuario } = require("../../validacoes/schemas");
 
 const login = async (req, res) => {
   const { email, senha } = req.body;
 
-  if (!email || !senha)
-    return res
-      .status(400)
-      .json({ mensagem: "O campo email e senha são obrigatórios." });
-
   try {
+    await schemaLoginUsuario.validate(req.body);
+
     const consultaEmail = "select * from usuarios where email = $1";
 
     const resultadoEmail = await db.query(consultaEmail, [email]);
@@ -32,7 +29,7 @@ const login = async (req, res) => {
         .json({ mensagem: "Usuário e/ou senha inválido(s)." });
     }
 
-    const token = jtw.sign({ id: usuario.id }, secret);
+    const token = jtw.sign({ id: usuario.id }, process.env.TOKEN_SECRET);
 
     return res.status(201).json({ token });
   } catch (error) {

@@ -1,16 +1,13 @@
 const db = require("../../conexao");
 const bcrypt = require("bcrypt");
+const { schemaCadastroUsuario } = require("../../validacoes/schemas");
 
 const cadastrar = async (req, res) => {
   const { nome, email, senha, nome_loja } = req.body;
 
-  const camposObrigatorios = verificaCampos(nome, email, senha, nome_loja);
-
-  if (camposObrigatorios) {
-    return res.status(400).json(camposObrigatorios);
-  }
-
   try {
+    await schemaCadastroUsuario.validate(req.body);
+
     const consultaEmail = "select * from usuarios where email = $1";
 
     const resultadoEmail = await db.query(consultaEmail, [email]);
@@ -44,14 +41,5 @@ const cadastrar = async (req, res) => {
     return res.status(400).json({ mensagem: error.message });
   }
 };
-
-function verificaCampos(nome, email, senha, nome_loja) {
-  if (!nome) return { mensagem: "O campo nome é obrigatório." };
-  if (!email) return { mensagem: "O campo email é obrigatório." };
-  if (!senha) return { mensagem: "O campo senha é obrigatório." };
-  if (!nome_loja) return { mensagem: "O campo nome da loja é obrigatório." };
-
-  return false;
-}
 
 module.exports = cadastrar;
