@@ -23,7 +23,8 @@
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "pg": "^8.7.1",
-    "yup": "^0.32.11"
+    "yup": "^0.32.11",
+    "yup-locales": "^1.2.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.13"
