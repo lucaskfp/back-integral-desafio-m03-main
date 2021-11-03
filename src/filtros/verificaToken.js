@@ -1,5 +1,4 @@
 const jtw = require("jsonwebtoken");
-const secret = require("../tokenSecret");
 
 const verificaToken = async (req, res, next) => {
   let token = req.headers.authorization;
@@ -13,7 +12,7 @@ const verificaToken = async (req, res, next) => {
 
   try {
     token = token.replace("Bearer", "").trim();
-    const { id } = await jtw.verify(token, secret);
+    const { id } = await jtw.verify(token, process.env.TOKEN_SECRET);
     req.usuario_id = id;
     next();
   } catch (error) {
