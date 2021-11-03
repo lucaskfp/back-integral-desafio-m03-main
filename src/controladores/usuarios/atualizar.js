@@ -1,17 +1,14 @@
 const db = require("../../conexao");
 const bcrypt = require("bcrypt");
+const { schemaCadastroUsuario } = require("../../validacoes/schemas");
 
 const atualizar = async (req, res) => {
   const { nome, email, senha, nome_loja } = req.body;
   const usuarioID = req.usuario_id;
 
-  const camposObrigatorios = verificaCampos(nome, email, senha, nome_loja);
-
-  if (camposObrigatorios) {
-    return res.status(400).json(camposObrigatorios);
-  }
-
   try {
+    await schemaCadastroUsuario.validate(req.body);
+
     const consultaEmail = "select * from usuarios where email = $1";
 
     const resultadoEmail = await db.query(consultaEmail, [email]);
@@ -30,7 +27,7 @@ const atualizar = async (req, res) => {
     const query =
       "update usuarios set nome = $1, email = $2, senha = $3, nome_loja = $4 where id = $5";
 
-    const resultadoAtualizacao = await db.query(query, [
+    await db.query(query, [
       nome,
       email,
       senhaCriptografada,
@@ -38,19 +35,10 @@ const atualizar = async (req, res) => {
       usuarioID,
     ]);
 
-    return res.json(resultadoAtualizacao);
+    return res.status(200).json("Atualizaco com sucesso.");
   } catch (error) {
-    return res.status(400).json(error);
+    return res.status(400).json(error.message);
   }
 };
-
-function verificaCampos(nome, email, senha, nome_loja) {
-  if (!nome) return { mensagem: "O campo nome é obrigatório." };
-  if (!email) return { mensagem: "O campo email é obrigatório." };
-  if (!senha) return { mensagem: "O campo senha é obrigatório." };
-  if (!nome_loja) return { mensagem: "O campo nome da loja é obrigatório." };
-
-  return false;
-}
 
 module.exports = atualizar;
